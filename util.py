@@ -13,7 +13,7 @@ def load_offspring(df, fn):
             offspring_experiment = df_offspring.loc[experiment_number]
         except KeyError as e:
             continue
-            
+        
         vc1 = offspring_experiment.parent1_id.value_counts()
         vc2 = offspring_experiment.parent2_id.value_counts()
         tally = vc1.add(vc2, fill_value=0)
@@ -23,4 +23,20 @@ def load_offspring(df, fn):
         tally.index = tally.index.rename('Ind_ID')
         tally.set_index(['Exp_Num',tally.index], inplace=True)
         tallies += [tally]
-    return tallies
+    df = df.join(pd.concat(tallies))
+    return df
+
+def rank_by_birthtime(df):
+    temps = []
+    for experiment_number in df.index.levels[0]:
+        df_exp = df.loc[experiment_number]
+        temp_df = df_exp.birthtime.argsort()
+        temp_df = temp_df.to_frame()
+        temp_df.columns=['rankBirth']
+        temp_df['Exp_Num'] = experiment_number
+        temp_df.set_index(['Exp_Num',temp_df.index], inplace=True)
+        temp_df['rankBirth' < 0] = np.nan
+        temps.append(temp_df)
+    df = df.join(pd.concat(temps))
+    return df
+
