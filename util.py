@@ -35,7 +35,7 @@ def rank_by_birthtime(df):
         temp_df.columns=['rankBirth']
         temp_df['Exp_Num'] = experiment_number
         temp_df.set_index(['Exp_Num',temp_df.index], inplace=True)
-        temp_df['rankBirth' < 0] = np.nan
+        temp_df.loc[temp_df.rankBirth < 0, 'rankBirth'] = np.nan
         temps.append(temp_df)
     df = df.join(pd.concat(temps))
     return df
